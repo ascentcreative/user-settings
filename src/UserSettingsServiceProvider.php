@@ -11,6 +11,9 @@ class UserSettingsServiceProvider extends ServiceProvider
   public function register()
   {
     //
+
+    // Register the helpers php file which includes convenience functions:
+    require_once (__DIR__.'/helpers.php');
    
     $this->mergeConfigFrom(
         __DIR__.'/../config/usersettings.php', 'geo'
@@ -21,7 +24,7 @@ class UserSettingsServiceProvider extends ServiceProvider
   public function boot()
   {
 
-    $this->loadViewsFrom(__DIR__.'/../resources/views', 'geo');
+    $this->loadViewsFrom(__DIR__.'/../resources/views', 'usersettings');
 
     $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
@@ -50,7 +53,7 @@ class UserSettingsServiceProvider extends ServiceProvider
       ], 'public');
 
       $this->publishes([
-        __DIR__.'/config/usersettiings.php' => config_path('usersettings.php'),
+        __DIR__.'/config/usersettings.php' => config_path('usersettings.php'),
       ]);
 
     }
