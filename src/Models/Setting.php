@@ -140,7 +140,7 @@ class Setting extends Model {
             $context_id = $context->id;
         }
 
-        dump($context_type, $context_id);
+        // dump($context_type, $context_id);
 
         // simplest to just remove and re-add all values:
         Setting::where('user_id', $user_id)
