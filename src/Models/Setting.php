@@ -5,6 +5,8 @@ namespace AscentCreative\UserSettings\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\DB;
+
 class Setting extends Model {
 
     use HasFactory;
@@ -123,45 +125,51 @@ class Setting extends Model {
 
     static function set($name, $value, $user_id=null, $context=null) {
 
-        if (is_null($user_id)) {
-            $user_id = auth()->user()->id;
-        }
+        // wrap in a transaction to prevent duplicate requests colliding (like a double click on a button)
+        DB::transaction(function() use ($name, $value, $user_id, $context) {
+            
+            if (is_null($user_id)) {
+                $user_id = auth()->user()->id;
+            }
 
-        if($user_id instanceof Model) {
-            $user_id = $user_id->id;
-        }
+            if($user_id instanceof Model) {
+                $user_id = $user_id->id;
+            }
 
-       
-        $context_type = null;
-        $context_id = null;
+        
+            $context_type = null;
+            $context_id = null;
 
-        if($context instanceof Model) {
-            $context_type = get_class($context);
-            $context_id = $context->id;
-        }
+            if($context instanceof Model) {
+                $context_type = get_class($context);
+                $context_id = $context->id;
+            }
 
-        // dump($context_type, $context_id);
+            // dump($context_type, $context_id);
 
-        // simplest to just remove and re-add all values:
-        Setting::where('user_id', $user_id)
-                ->where('setting_name', $name)
-                ->where('context_type',  $context_type)
-                ->where('context_id', $context_id)
-                ->delete();
+            
+            // simplest to just remove and re-add all values:
+            Setting::where('user_id', $user_id)
+                    ->where('setting_name', $name)
+                    ->where('context_type',  $context_type)
+                    ->where('context_id', $context_id)
+                    ->delete();
 
-        if(!is_array($value)) {
-            $value = [$value];
-        }
+            if(!is_array($value)) {
+                $value = [$value];
+            }
 
-        foreach($value as $item) {
-            Setting::create([
-                'user_id'=>$user_id,
-                'setting_name' => $name,
-                'context_type' => $context_type,
-                'context_id' => $context_id,
-                'setting_value' => $item,
-            ]);
-        }
+            foreach($value as $item) {
+                Setting::create([
+                    'user_id'=>$user_id,
+                    'setting_name' => $name,
+                    'context_type' => $context_type,
+                    'context_id' => $context_id,
+                    'setting_value' => $item,
+                ]);
+            }
+
+        });
 
 
     }
